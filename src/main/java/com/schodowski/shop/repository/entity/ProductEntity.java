@@ -21,7 +21,6 @@ public class ProductEntity {
 
     private String name;
     private String category;
-    private float price;
 
     @OneToMany(mappedBy = "product")
     private List<OrderItemEntity> orderItems;
