@@ -8,7 +8,11 @@ import com.schodowski.shop.repository.ProductRepo;
 import com.schodowski.shop.repository.entity.InventoryEntity;
 import com.schodowski.shop.repository.entity.ProductEntity;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -19,8 +23,12 @@ public class InventoryService {
     private final InventoryRepo inventoryRepo;
     private final ProductRepo productRepo;
     private final ProductMapper productMapper;
+    private static final Logger logger = LoggerFactory.getLogger(InventoryService.class);
+
 
     public ProductDto addProduct(ProductDto productDto) {
+        logger.info("Dodawanie nowego produktu: {}", productDto.getName());
+
         ProductEntity productEntity = productMapper.toEntity(productDto);
         productRepo.save(productEntity);
         return productMapper.toDto(productEntity);
@@ -28,9 +36,12 @@ public class InventoryService {
 
 
     public boolean deleteProduct(long id) {
+        logger.info("Usuwanie produktu o ID: {}", id);
+
         return productRepo.findById(id)
                 .map(product -> {
                     productRepo.deleteById(id);
+                    logger.info("Produkt o ID {} został usunięty", id);
                     return true;
                 })
                 .orElse(false);
@@ -40,6 +51,7 @@ public class InventoryService {
     public List<ProductEntity> getAllProducts() {
         return productRepo.findAll();
     }
+
 
     public List<InventoryEntity> getAllInventory() {
         return inventoryRepo.findAll();
@@ -53,6 +65,7 @@ public class InventoryService {
         inventoryEntity.setQuantity(inventoryEntity.getQuantity() + inventoryDto.getQuantity());
         inventoryRepo.save(inventoryEntity);
 
+        logger.info("Zwiększono ilość produktu: {} o {}", inventoryDto.getName(), inventoryDto.getQuantity());
         return mapToInventoryDto(inventoryEntity);
     }
 
@@ -62,21 +75,22 @@ public class InventoryService {
         InventoryEntity inventoryEntity = getInventoryByProduct(productEntity);
 
         if (inventoryEntity.getQuantity() < inventoryDto.getQuantity()) {
-            throw new IllegalArgumentException("Product quantity on inventory is insufficient");
+            logger.warn("Próba usunięcia większej ilości produktu {} niż dostępna w magazynie", inventoryDto.getName());
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Brak wystarczającej ilości produktu na magazynie");
         }
 
         inventoryEntity.setQuantity(inventoryEntity.getQuantity() - inventoryDto.getQuantity());
         inventoryRepo.save(inventoryEntity);
 
+        logger.info("Zredukowano ilość produktu: {} o {}", inventoryDto.getName(), inventoryDto.getQuantity());
         return true;
     }
 
 
     private ProductEntity getProductByName(String name) {
         return productRepo.findByName(name)
-                .orElseThrow(() -> new IllegalArgumentException("Product not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Produkt nie istnieje"));
     }
-
 
     private InventoryEntity getOrCreateInventory(ProductEntity productEntity) {
         return inventoryRepo.findByProduct(productEntity)
@@ -86,12 +100,10 @@ public class InventoryService {
                         .build());
     }
 
-
     private InventoryEntity getInventoryByProduct(ProductEntity productEntity) {
         return inventoryRepo.findByProduct(productEntity)
-                .orElseThrow(() -> new IllegalArgumentException("Product does not have inventory record"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Brak rekordu w magazynie dla tego produktu"));
     }
-
 
     private InventoryDto mapToInventoryDto(InventoryEntity inventoryEntity) {
         return InventoryDto.builder()
@@ -99,7 +111,4 @@ public class InventoryService {
                 .quantity(inventoryEntity.getQuantity())
                 .build();
     }
-
-
 }
-
