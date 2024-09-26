@@ -5,8 +5,8 @@ import lombok.Data;
 
 @Data
 @Builder
-public class ProductDto {
+public class InventoryDto {
 
     String name;
-    String category;
+    float quantity;
 }

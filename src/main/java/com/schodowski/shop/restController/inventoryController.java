@@ -1,6 +1,8 @@
 package com.schodowski.shop.restController;
 
+import com.schodowski.shop.dto.InventoryDto;
 import com.schodowski.shop.dto.ProductDto;
+import com.schodowski.shop.mapper.InventoryMapper;
 import com.schodowski.shop.mapper.ProductMapper;
 import com.schodowski.shop.services.InventoryService;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +17,7 @@ public class inventoryController {
 
     private final InventoryService inventoryService;
     private final ProductMapper productMapper;
+    private final InventoryMapper inventoryMapper;
 
     @PostMapping("/api/product/add")
     public ProductDto addProduct(@RequestBody ProductDto productDto) {
@@ -36,10 +39,24 @@ public class inventoryController {
                 .collect(Collectors.toList());
     }
 
-    //dodaj do magazynu jakas ilosc produktu
 
-    //usun z magazynu jakas ilosc produktu
+    @PostMapping("/api/product/increase")
+    public InventoryDto increaseProduct(@RequestBody InventoryDto inventoryDto) {
+        return inventoryService.increaseProduct(inventoryDto);
+    }
 
 
-    // wprowadz cene zakupu produktu ( kazdy wprowadzony produkt na magazyn to ososbna pozycja )
+    @PostMapping("/api/product/decrease")
+    public boolean decreaseProduct(@RequestBody InventoryDto inventoryDto) {
+        return inventoryService.decreaseProduct(inventoryDto);
+    }
+
+    @GetMapping("/api/product/getAllInventory")
+    public List<InventoryDto> getAllInventory(){
+        return inventoryService.getAllInventory()
+                .stream()
+                .map(inventoryMapper::toDto)
+                .collect(Collectors.toList());
+    }
+
 }

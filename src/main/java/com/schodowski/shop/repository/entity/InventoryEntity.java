@@ -21,5 +21,5 @@ public class InventoryEntity {
     @JoinColumn(name = "product_id")
     private ProductEntity product;
 
-    private int quantity;
+    private float quantity;
 }
