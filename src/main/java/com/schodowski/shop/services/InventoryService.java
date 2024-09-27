@@ -27,8 +27,13 @@ public class InventoryService {
 
 
     public ProductDto addProduct(ProductDto productDto) {
-        logger.info("Dodawanie nowego produktu: {}", productDto.getName());
 
+        if(productRepo.findByName(productDto.getName()).isPresent()){
+            logger.warn("Produkt o nazwie {} już istnieje w bazie danych", productDto.getName());
+            throw new IllegalArgumentException("Produkt juz istanieje w bazie danych");
+        }
+
+        logger.info("Dodawanie nowego produktu: {}", productDto.getName());
         ProductEntity productEntity = productMapper.toEntity(productDto);
         productRepo.save(productEntity);
         return productMapper.toDto(productEntity);
@@ -92,6 +97,7 @@ public class InventoryService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Produkt nie istnieje"));
     }
 
+
     private InventoryEntity getOrCreateInventory(ProductEntity productEntity) {
         return inventoryRepo.findByProduct(productEntity)
                 .orElse(InventoryEntity.builder()
@@ -100,10 +106,12 @@ public class InventoryService {
                         .build());
     }
 
+
     private InventoryEntity getInventoryByProduct(ProductEntity productEntity) {
         return inventoryRepo.findByProduct(productEntity)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Brak rekordu w magazynie dla tego produktu"));
     }
+
 
     private InventoryDto mapToInventoryDto(InventoryEntity inventoryEntity) {
         return InventoryDto.builder()
