@@ -15,7 +15,7 @@ public class orderController {
     private final OrderService orderService;
 
     @PostMapping("/api/order/add")
-    public OrderEntity addOrder(@RequestBody OrderDto orderDto){
+    public float addOrder(@RequestBody OrderDto orderDto){
         return orderService.entryOrder(orderDto);
     }
 }

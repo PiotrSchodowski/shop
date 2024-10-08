@@ -40,19 +40,19 @@ public class inventoryController {
     }
 
 
-    @PostMapping("/api/product/increase")
+    @PostMapping("/api/inventory/increase")
     public InventoryDto increaseProduct(@RequestBody InventoryDto inventoryDto) {
         return inventoryService.increaseProduct(inventoryDto);
     }
 
 
-    @PostMapping("/api/product/decrease")
+    @PostMapping("/api/inventory/decrease")
     public boolean decreaseProduct(@RequestBody InventoryDto inventoryDto) {
         return inventoryService.decreaseProduct(inventoryDto);
     }
 
 
-    @GetMapping("/api/product/getAllInventory")
+    @GetMapping("/api/inventory/getAllInventory")
     public List<InventoryDto> getAllInventory(){
         return inventoryService.getAllInventory()
                 .stream()

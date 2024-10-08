@@ -29,11 +29,11 @@ public class InventoryService {
     public ProductDto addProduct(ProductDto productDto) {
 
         if(productRepo.findByName(productDto.getName()).isPresent()){
-            logger.warn("Produkt o nazwie {} już istnieje w bazie danych", productDto.getName());
-            throw new IllegalArgumentException("Produkt juz istanieje w bazie danych");
+            logger.warn("Product with name {} already exists in the database", productDto.getName());
+            throw new IllegalArgumentException("Product already exists in the database");
         }
 
-        logger.info("Dodawanie nowego produktu: {}", productDto.getName());
+        logger.info("Adding new product: {}", productDto.getName());
         ProductEntity productEntity = productMapper.toEntity(productDto);
         productRepo.save(productEntity);
         return productMapper.toDto(productEntity);
@@ -41,12 +41,12 @@ public class InventoryService {
 
 
     public boolean deleteProduct(long id) {
-        logger.info("Usuwanie produktu o ID: {}", id);
+        logger.info("Deleting product with ID: {}", id);
 
         return productRepo.findById(id)
                 .map(product -> {
                     productRepo.deleteById(id);
-                    logger.info("Produkt o ID {} został usunięty", id);
+                    logger.info("Product with ID {} has been deleted", id);
                     return true;
                 })
                 .orElse(false);
@@ -70,7 +70,7 @@ public class InventoryService {
         inventoryEntity.setQuantity(inventoryEntity.getQuantity() + inventoryDto.getQuantity());
         inventoryRepo.save(inventoryEntity);
 
-        logger.info("Zwiększono ilość produktu: {} o {}", inventoryDto.getName(), inventoryDto.getQuantity());
+        logger.info("Increased quantity of product: {} by {}", inventoryDto.getName(), inventoryDto.getQuantity());
         return mapToInventoryDto(inventoryEntity);
     }
 
@@ -80,21 +80,21 @@ public class InventoryService {
         InventoryEntity inventoryEntity = getInventoryByProduct(productEntity);
 
         if (inventoryEntity.getQuantity() < inventoryDto.getQuantity()) {
-            logger.warn("Próba usunięcia większej ilości produktu {} niż dostępna w magazynie", inventoryDto.getName());
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Brak wystarczającej ilości produktu na magazynie");
+            logger.warn("Attempting to remove more quantity of product {} than available in stock", inventoryDto.getName());
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Not enough quantity of product in stock");
         }
 
         inventoryEntity.setQuantity(inventoryEntity.getQuantity() - inventoryDto.getQuantity());
         inventoryRepo.save(inventoryEntity);
 
-        logger.info("Zredukowano ilość produktu: {} o {}", inventoryDto.getName(), inventoryDto.getQuantity());
+        logger.info("Reduced quantity of product: {} by {}", inventoryDto.getName(), inventoryDto.getQuantity());
         return true;
     }
 
 
     private ProductEntity getProductByName(String name) {
         return productRepo.findByName(name)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Produkt nie istnieje"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product does not exist"));
     }
 
 
@@ -109,7 +109,7 @@ public class InventoryService {
 
     private InventoryEntity getInventoryByProduct(ProductEntity productEntity) {
         return inventoryRepo.findByProduct(productEntity)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Brak rekordu w magazynie dla tego produktu"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No inventory record for this product"));
     }
 
 

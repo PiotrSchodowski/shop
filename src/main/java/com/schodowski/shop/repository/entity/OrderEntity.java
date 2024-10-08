@@ -20,7 +20,7 @@ public class OrderEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
 
-    @ManyToOne // Many orders can have the same product
+    @ManyToOne
     @JoinColumn(name = "product_id", referencedColumnName = "id")
     private ProductEntity product;
 
