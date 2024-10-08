@@ -1,5 +1,6 @@
 package com.schodowski.shop.repository.entity;
 
+import com.schodowski.shop.repository.entity.ProductEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -7,7 +8,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Entity
 @Data
@@ -20,14 +20,12 @@ public class OrderEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
 
+    @ManyToOne // Many orders can have the same product
+    @JoinColumn(name = "product_id", referencedColumnName = "id")
+    private ProductEntity product;
+
     private LocalDateTime date;
-
-    @OneToMany(mappedBy = "orderEntity", cascade = CascadeType.ALL)
-    private List<OrderItemEntity> orderItems;
-
     private float totalOrderValue;
-
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "cash_id")
-    private CashEntity payment;
 }
+
+

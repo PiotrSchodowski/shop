@@ -51,6 +51,7 @@ public class inventoryController {
         return inventoryService.decreaseProduct(inventoryDto);
     }
 
+
     @GetMapping("/api/product/getAllInventory")
     public List<InventoryDto> getAllInventory(){
         return inventoryService.getAllInventory()

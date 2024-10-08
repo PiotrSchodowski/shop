@@ -11,6 +11,7 @@ public class ProductMapper {
         return ProductDto.builder()
                 .name(productEntity.getName())
                 .category(productEntity.getCategory())
+                .price(productEntity.getPrice())
                 .build();
     }
 
@@ -19,6 +20,7 @@ public class ProductMapper {
         return ProductEntity.builder()
                 .name(productDto.getName())
                 .category(productDto.getCategory())
+                .price(productDto.getPrice())
                 .build();
     }
 }
